@@ -1,6 +1,7 @@
-import React from 'react';
-import { Eye, Shield, Cpu, GitBranch, Settings, FileText, BarChart3, Radio } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, Shield, Cpu, GitBranch, Settings, FileText, BarChart3, Radio, Volume2, VolumeX, HelpCircle } from 'lucide-react';
 import ShinyText from './reactbits/ShinyText';
+import { toggleMute, getMuteState, playPop } from '../utils/soundEffects';
 
 export default function Navbar({
   activeTab,
@@ -9,25 +10,33 @@ export default function Navbar({
   onOpenManageModal,
   isScanning
 }) {
+  const [muted, setMuted] = useState(getMuteState());
+
+  const handleToggleSound = () => {
+    const isNowMuted = toggleMute();
+    setMuted(isNowMuted);
+    if (!isNowMuted) playPop();
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#07090e]/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 border border-cyan-400/40 shadow-lg shadow-cyan-500/20">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 border border-cyan-400/40 shadow-lg shadow-cyan-500/25">
             <Radio className={`w-5 h-5 text-white ${isScanning ? 'animate-pulse' : ''}`} />
             {isScanning && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 animate-ping" />
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-cyan-400 animate-ping" />
             )}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono font-bold tracking-widest uppercase text-cyan-400">
-                Threat Intelligence
+              <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-cyan-400">
+                Universal Spy Dashboard
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-800/50">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                Live Agent
+                Live Tracker
               </span>
             </div>
             <h1 className="text-base sm:text-lg font-extrabold text-slate-100 tracking-tight leading-none">
@@ -37,36 +46,45 @@ export default function Navbar({
         </div>
 
         {/* View Switcher Tabs */}
-        <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-medium">
+        <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-semibold">
           <button
-            onClick={() => setActiveTab('feed')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+            onClick={() => {
+              playPop();
+              setActiveTab('feed');
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
               activeTab === 'feed'
-                ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-sm'
+                ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
             <Cpu className="w-4 h-4" />
-            <span>Live Radar & Feed</span>
+            <span>Radar & Live Signals</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('brief')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+            onClick={() => {
+              playPop();
+              setActiveTab('brief');
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
               activeTab === 'brief'
-                ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-sm'
+                ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>Intelligence Brief</span>
+            <span>Executive Brief</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+            onClick={() => {
+              playPop();
+              setActiveTab('analytics');
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
               activeTab === 'analytics'
-                ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-sm'
+                ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -75,16 +93,32 @@ export default function Navbar({
           </button>
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-3">
+        {/* Right Actions: Sound Toggle + Targets + GitHub */}
+        <div className="flex items-center gap-2.5">
+          {/* Sound Toggle */}
           <button
-            onClick={onOpenManageModal}
+            type="button"
+            onClick={handleToggleSound}
+            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/70 transition-colors"
+            title={muted ? 'Unmute interactive sound effects' : 'Mute sound effects'}
+          >
+            {muted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+          </button>
+
+          {/* Manage Targets Button */}
+          <button
+            onClick={() => {
+              playPop();
+              onOpenManageModal();
+            }}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 border border-slate-700/80 transition-colors shadow-sm"
           >
             <Settings className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Targets ({competitorCount})</span>
+            <span className="hidden sm:inline">Targets ({competitorCount})</span>
+            <span className="sm:hidden">{competitorCount}</span>
           </button>
 
+          {/* GitHub Repo Link */}
           <a
             href="https://github.com/Sprinkled-cpu/ai-competitor-watch"
             target="_blank"
@@ -109,7 +143,7 @@ export default function Navbar({
           onClick={() => setActiveTab('brief')}
           className={`px-3 py-1.5 rounded-lg shrink-0 ${activeTab === 'brief' ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-400'}`}
         >
-          Intelligence Brief
+          Executive Brief
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
