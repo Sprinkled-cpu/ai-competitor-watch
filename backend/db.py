@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 from typing import List, Optional, Dict, Any
 from pathlib import Path
@@ -21,22 +22,28 @@ class Storage:
         }
 
     async def connect(self):
-        """Try connecting to MongoDB; if unavailable, fallback gracefully to persistent local JSON file."""
-        try:
-            from motor.motor_asyncio import AsyncIOMotorClient
-            client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=1500)
-            # Ping database
-            await client.admin.command('ping')
-            self.mongo_client = client
-            self.db = client[DB_NAME]
-            self.use_mongo = True
-            logger.info(f"Connected successfully to MongoDB at {MONGO_URI} [{DB_NAME}]")
-            await self._init_db()
-        except Exception as e:
+        """Try connecting to MongoDB if enabled; otherwise use persistent local JSON file storage."""
+        use_mongo_env = os.getenv("USE_MONGO", "false").lower() in ("true", "1", "yes")
+        if use_mongo_env:
+            try:
+                import asyncio
+                from motor.motor_asyncio import AsyncIOMotorClient
+                client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+                await asyncio.wait_for(client.admin.command('ping'), timeout=2.0)
+                self.mongo_client = client
+                self.db = client[DB_NAME]
+                self.use_mongo = True
+                logger.info(f"Connected successfully to MongoDB at {MONGO_URI} [{DB_NAME}]")
+                await self._init_db()
+                return
+            except Exception as e:
+                self.use_mongo = False
+                logger.warning(f"MongoDB not available ({e}). Falling back to local file storage: {LOCAL_DB_FILE}")
+        else:
             self.use_mongo = False
-            logger.warning(f"MongoDB not available ({e}). Using persistent local file storage: {LOCAL_DB_FILE}")
-            self._load_local_data()
-            await self._init_db()
+
+        self._load_local_data()
+        await self._init_db()
 
     def _load_local_data(self):
         if LOCAL_DB_FILE.exists():
@@ -61,13 +68,26 @@ class Storage:
         competitors = await self.get_competitors()
         if not competitors:
             logger.info("Database empty: Seeding default AI competitors...")
-            for comp in DEFAULT_COMPETITORS:
-                await self.create_competitor(comp)
-            
-            logger.info("Seeding realistic intelligence updates...")
             seed_updates = generate_seed_updates()
-            for upd in seed_updates:
-                await self.save_update(upd)
+            
+            if self.use_mongo:
+                for comp in DEFAULT_COMPETITORS:
+                    await self.create_competitor(comp)
+                for upd in seed_updates:
+                    await self.save_update(upd)
+            else:
+                self._local_data["competitors"] = list(DEFAULT_COMPETITORS)
+                self._local_data["updates"] = list(seed_updates)
+                self._save_local_data()
+
+            # Generate initial brief
+            try:
+                from agent.synthesizer import ExecutiveBriefSynthesizer
+                brief = ExecutiveBriefSynthesizer().generate_brief(DEFAULT_COMPETITORS, seed_updates)
+                await self.save_brief(brief)
+                logger.info("Initial executive brief synthesized and saved.")
+            except Exception as e:
+                logger.warning(f"Failed to generate initial brief: {e}")
 
     # Competitor operations
     async def get_competitors(self) -> List[Dict[str, Any]]:

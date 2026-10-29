@@ -21,6 +21,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - USE_MONGO=true
       - MONGO_URI=mongodb://mongodb:27017
       - DB_NAME=competitor_watch
       - MAX_ARTICLES_PER_COMPETITOR=12
