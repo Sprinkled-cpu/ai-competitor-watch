@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, RefreshCw, Plus, Layers, Flame, FileText, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, RefreshCw, Plus, Layers, Flame, FileText, CheckCircle2, Radio, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import CyberGrid from './components/reactbits/CyberGrid';
 import LiveAgentTerminal from './components/LiveAgentTerminal';
 import ThreatRadar from './components/ThreatRadar';
+import InteractiveBubbleRadar from './components/InteractiveBubbleRadar';
 import UpdateCard from './components/UpdateCard';
+import UpdateDetailModal from './components/UpdateDetailModal';
 import ExecutiveBriefView from './components/ExecutiveBriefView';
 import AnalyticsView from './components/AnalyticsView';
 import ManageCompetitorsModal from './components/ManageCompetitorsModal';
@@ -34,6 +37,9 @@ export default function App() {
   const [minImpact, setMinImpact] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   
+  const [radarViewMode, setRadarViewMode] = useState('bubbles'); // 'bubbles' | 'matrix'
+  const [selectedDetailUpdate, setSelectedDetailUpdate] = useState(null);
+
   const [updates, setUpdates] = useState([]);
   const [latestBrief, setLatestBrief] = useState(null);
   const [analytics, setAnalytics] = useState(null);
@@ -154,7 +160,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* React Bits Cyber Grid Background */}
+      {/* React Bits Cyber Grid Background with Floating Ambient Bubbles */}
       <CyberGrid />
 
       {/* Main Navbar */}
@@ -168,29 +174,50 @@ export default function App() {
 
       {/* Main Container */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Hero Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-1">
-              <span>SYSTEM READY</span>
+        {/* Enterprise Hero Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span>ENTERPRISE SURVEILLANCE RADAR</span>
               <span className="text-slate-600">//</span>
-              <DecryptedText text="AUTOMATED RADAR SCANNER" />
+              <DecryptedText text="REAL-TIME THREAT RADAR ONLINE" />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-100 tracking-tight">
+            
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight">
               AI Competitor <ShinyText text="Intelligence Engine" />
             </h2>
-            <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Surveillance agent tracking 5–10 frontier rivals. Automates noise filtering, multi-source deduplication, strategic categorization, and executive threat briefs.
+            
+            <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+              Enterprise-grade autonomous market intelligence system that continuously monitors key rival ecosystems, strips newsroom noise and duplicate syndicated articles, and delivers real-time strategic counter-moves.
             </p>
+
+            {/* Live Status Indicators */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-mono">
+              <span className="px-3 py-1 rounded-full bg-cyan-950/60 text-cyan-300 border border-cyan-800/50 flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
+                Active Targets: <strong>{competitors.length} Monitored</strong>
+              </span>
+
+              <span className="px-3 py-1 rounded-full bg-slate-900/90 text-slate-300 border border-slate-800 flex items-center gap-1.5 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                Noise Suppression: <strong>Real-time</strong>
+              </span>
+
+              <span className="px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                Strategic Impact: <strong>1-10 Scale</strong>
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setIsManageModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-md"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700/80 hover:border-cyan-500/50 transition-all shadow-lg shadow-cyan-950/20"
             >
               <Plus className="w-4 h-4" />
-              <span>Configure Targets ({competitors.length})</span>
+              <span>Configure Targets</span>
             </button>
           </div>
         </div>
@@ -205,57 +232,104 @@ export default function App() {
         {/* Tab 1: Live Feed View */}
         {activeTab === 'feed' && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            {/* Threat Radar Matrix Bar */}
-            {latestBrief?.threat_radar && (
-              <ThreatRadar
-                items={latestBrief.threat_radar}
-                selectedCompetitor={selectedCompetitor}
-                onSelectCompetitor={setSelectedCompetitor}
-              />
-            )}
+            {/* View Switcher for Threat Radar: Interactive Bubbles vs Matrix Cards */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                    Threat Radar Display Mode:
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono">
+                  <button
+                    onClick={() => setRadarViewMode('bubbles')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                      radarViewMode === 'bubbles'
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Radio className="w-3.5 h-3.5" />
+                    <span>Dynamic Bubbles</span>
+                  </button>
+                  <button
+                    onClick={() => setRadarViewMode('matrix')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                      radarViewMode === 'matrix'
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Grid Matrix</span>
+                  </button>
+                </div>
+              </div>
 
-            {/* Target Competitor Filter Dock */}
+              {/* Dynamic Radar View */}
+              {latestBrief?.threat_radar && (
+                radarViewMode === 'bubbles' ? (
+                  <InteractiveBubbleRadar
+                    items={latestBrief.threat_radar}
+                    selectedCompetitor={selectedCompetitor}
+                    onSelectCompetitor={setSelectedCompetitor}
+                  />
+                ) : (
+                  <ThreatRadar
+                    items={latestBrief.threat_radar}
+                    selectedCompetitor={selectedCompetitor}
+                    onSelectCompetitor={setSelectedCompetitor}
+                  />
+                )
+              )}
+            </div>
+
+            {/* Target Competitor Filter Dock with Spring Bounce */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                  Select Competitor Target:
+                  Filter by Monitored Rival:
                 </span>
                 {selectedCompetitor && (
                   <button
                     onClick={() => setSelectedCompetitor(null)}
                     className="text-xs font-mono text-cyan-400 hover:underline"
                   >
-                    Reset Target Filter (Show All)
+                    Reset Filter (Show All Competitors)
                   </button>
                 )}
               </div>
 
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedCompetitor(null)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 border ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 border ${
                     selectedCompetitor === null
-                      ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md shadow-cyan-500/30'
+                      ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-lg shadow-cyan-500/30'
                       : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
                   }`}
                 >
                   All Competitors ({competitors.length})
-                </button>
+                </motion.button>
 
                 {competitors.map((comp) => {
                   const isSelected = selectedCompetitor === comp.name;
                   return (
-                    <button
+                    <motion.button
                       key={comp.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedCompetitor(isSelected ? null : comp.name)}
-                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 border ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 border ${
                         isSelected
-                          ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-md shadow-cyan-500/20'
+                          ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-white border-cyan-400 shadow-md shadow-cyan-500/30 ring-2 ring-cyan-400/40'
                           : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:text-white hover:border-slate-700'
                       }`}
                     >
                       <span>{comp.name}</span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -263,20 +337,22 @@ export default function App() {
 
             {/* Filter & Search Control Bar */}
             <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/90 backdrop-blur-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-              {/* Category Pills */}
+              {/* Category Filter Bubbles */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none text-xs">
                 {CATEGORIES.map((cat) => (
-                  <button
+                  <motion.button
                     key={cat}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 border ${
+                    className={`px-3 py-1.5 rounded-xl font-medium transition-all shrink-0 border ${
                       selectedCategory === cat
                         ? 'bg-slate-800 text-cyan-300 border-cyan-500/40 shadow-sm'
                         : 'text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-800/40'
                     }`}
                   >
                     {cat}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
@@ -284,9 +360,9 @@ export default function App() {
               <div className="flex items-center gap-3 shrink-0">
                 <button
                   onClick={() => setMinImpact(minImpact === 8 ? 1 : 8)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-medium border transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium border transition-all ${
                     minImpact >= 8
-                      ? 'bg-rose-950/60 text-rose-300 border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
+                      ? 'bg-rose-950/60 text-rose-300 border-rose-500/50 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
                       : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-slate-200'
                   }`}
                   title="Filter high impact signals (score >= 8)"
@@ -302,7 +378,7 @@ export default function App() {
                     placeholder="Search intelligence..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 text-xs text-slate-200 placeholder-slate-500 focus:outline-none"
+                    className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 text-xs text-slate-200 placeholder-slate-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -314,8 +390,9 @@ export default function App() {
                 <span>
                   Showing <strong className="text-cyan-300">{updates.length}</strong> verified updates
                 </span>
-                <span className="flex items-center gap-1 text-slate-500">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Real-time deduplication active
+                <span className="flex items-center gap-1.5 text-slate-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Click any card for Deep-Dive Pop-up</span>
                 </span>
               </div>
 
@@ -338,7 +415,11 @@ export default function App() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {updates.map((update) => (
-                    <UpdateCard key={update.id} update={update} />
+                    <UpdateCard
+                      key={update.id}
+                      update={update}
+                      onSelect={(u) => setSelectedDetailUpdate(u)}
+                    />
                   ))}
                 </div>
               )}
@@ -367,6 +448,13 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Interactive Update Detail Pop-up Modal */}
+      <UpdateDetailModal
+        update={selectedDetailUpdate}
+        isOpen={Boolean(selectedDetailUpdate)}
+        onClose={() => setSelectedDetailUpdate(null)}
+      />
 
       {/* Manage Competitors Modal */}
       <ManageCompetitorsModal

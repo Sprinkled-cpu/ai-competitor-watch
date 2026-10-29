@@ -2,7 +2,7 @@ import React from 'react';
 import { ExternalLink, Layers, Sparkles, AlertOctagon, TrendingUp, DollarSign, Users, Handshake, Landmark, Cpu } from 'lucide-react';
 import SpotlightCard from './reactbits/SpotlightCard';
 
-export default function UpdateCard({ update }) {
+export default function UpdateCard({ update, onSelect }) {
   const getCategoryConfig = (category) => {
     switch (category) {
       case 'Product':
@@ -73,7 +73,8 @@ export default function UpdateCard({ update }) {
     <SpotlightCard
       spotlightColor={catConfig.spotlight}
       borderColor={catConfig.border}
-      className="flex flex-col justify-between h-full group hover:-translate-y-1 transition-all duration-300"
+      onClick={() => onSelect && onSelect(update)}
+      className="flex flex-col justify-between h-full group hover:-translate-y-1.5 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-cyan-950/40"
     >
       <div>
         {/* Top Badges Bar */}
