@@ -1,0 +1,316 @@
+from typing import List, Dict, Any
+from datetime import datetime, timedelta
+
+DEFAULT_COMPETITORS: List[Dict[str, Any]] = [
+    {
+        "id": "comp-openai",
+        "name": "OpenAI",
+        "domain": "openai.com",
+        "description": "Creator of ChatGPT, GPT-4o, and o1/o3 reasoning models.",
+        "tags": ["Frontier Models", "Consumer AI", "Enterprise API"],
+        "keywords": ["OpenAI", "ChatGPT", "GPT-4o", "o1", "Sora", "Sam Altman"],
+        "logo_url": "https://img.icons8.com/color/96/chatgpt.png",
+        "active": True
+    },
+    {
+        "id": "comp-anthropic",
+        "name": "Anthropic",
+        "domain": "anthropic.com",
+        "description": "AI safety and research company behind Claude 3.5 Sonnet and Computer Use.",
+        "tags": ["Safety Research", "Enterprise AI", "Coding Models"],
+        "keywords": ["Anthropic", "Claude 3.5", "Sonnet", "Dario Amodei", "Computer Use"],
+        "logo_url": "https://img.icons8.com/fluency/96/brain.png",
+        "active": True
+    },
+    {
+        "id": "comp-perplexity",
+        "name": "Perplexity",
+        "domain": "perplexity.ai",
+        "description": "Conversational AI search engine offering Pro Search and Spaces.",
+        "tags": ["AI Search", "Publishing Deals", "Enterprise Search"],
+        "keywords": ["Perplexity AI", "Aravind Srinivas", "Perplexity Pro", "Sonar"],
+        "logo_url": "https://img.icons8.com/color/96/search--v1.png",
+        "active": True
+    },
+    {
+        "id": "comp-cursor",
+        "name": "Cursor",
+        "domain": "cursor.com",
+        "description": "Anysphere's AI-first code editor with tab autocomplete and agent composer.",
+        "tags": ["Developer Tools", "AI IDE", "Agentic Coding"],
+        "keywords": ["Cursor editor", "Anysphere", "Cursor AI", "Composer"],
+        "logo_url": "https://img.icons8.com/color/96/code.png",
+        "active": True
+    },
+    {
+        "id": "comp-mistral",
+        "name": "Mistral AI",
+        "domain": "mistral.ai",
+        "description": "European open-weight and proprietary AI champion with Le Chat & Pixtral.",
+        "tags": ["Open Weights", "European AI", "Efficiency"],
+        "keywords": ["Mistral AI", "Arthur Mensch", "Mixtral", "Le Chat", "Pixtral"],
+        "logo_url": "https://img.icons8.com/color/96/wind.png",
+        "active": True
+    },
+    {
+        "id": "comp-cohere",
+        "name": "Cohere",
+        "domain": "cohere.com",
+        "description": "Enterprise-focused foundational model provider known for Command R+ and RAG embeddings.",
+        "tags": ["Enterprise B2B", "Private Cloud", "RAG & Embeddings"],
+        "keywords": ["Cohere", "Aidan Gomez", "Command R+", "North"],
+        "logo_url": "https://img.icons8.com/fluency/96/flow-chart.png",
+        "active": True
+    },
+    {
+        "id": "comp-xai",
+        "name": "xAI",
+        "domain": "x.ai",
+        "description": "Elon Musk's AI lab developing Grok and Colossus 100k H100 supercluster.",
+        "tags": ["Frontier Scale", "Realtime X Data", "Compute Infrastructure"],
+        "keywords": ["xAI", "Grok", "Colossus", "Elon Musk"],
+        "logo_url": "https://img.icons8.com/color/96/twitterx--v1.png",
+        "active": True
+    },
+    {
+        "id": "comp-deepmind",
+        "name": "Google DeepMind",
+        "domain": "deepmind.google",
+        "description": "Google's unified AI research lab, building Gemini 1.5, AlphaFold 3, and Astra.",
+        "tags": ["Multimodal", "Science AI", "Autonomous Agents"],
+        "keywords": ["Google DeepMind", "Gemini 1.5 Pro", "AlphaFold", "Project Astra"],
+        "logo_url": "https://img.icons8.com/color/96/google-logo.png",
+        "active": True
+    }
+]
+
+def generate_seed_updates() -> List[Dict[str, Any]]:
+    now = datetime.utcnow()
+    
+    updates = [
+        # OpenAI
+        {
+            "id": "upd-oa-1",
+            "competitor_id": "comp-openai",
+            "competitor_name": "OpenAI",
+            "title": "OpenAI Unveils Operator Agent for Autonomous Browser-Based Workflows",
+            "url": "https://openai.com/index/operator-autonomous-agent",
+            "source": "OpenAI Engineering Blog",
+            "published_at": (now - timedelta(days=1, hours=3)).isoformat(),
+            "category": "Product",
+            "impact_score": 9,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "OpenAI announced an experimental computer-using agent codenamed Operator capable of writing code, filling forms, and navigating complex multi-step enterprise workflows in the browser.",
+            "strategic_takeaway": "Directly threatens workflow automation, RPA tools, and dev assistants by controlling native browser UI natively via API.",
+            "tags": ["Agentic AI", "Browser Automation", "Enterprise"],
+            "duplicate_count": 4,
+            "similar_sources": ["TechCrunch", "The Verge", "Reuters"],
+            "is_featured": True
+        },
+        {
+            "id": "upd-oa-2",
+            "competitor_id": "comp-openai",
+            "competitor_name": "OpenAI",
+            "title": "OpenAI slashes input token pricing by 50% for o-series reasoning models",
+            "url": "https://openai.com/pricing",
+            "source": "OpenAI Pricing Announcement",
+            "published_at": (now - timedelta(days=3)).isoformat(),
+            "category": "Pricing",
+            "impact_score": 8,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "In response to open-source distilled reasoning competitors, OpenAI decreased reasoning tokens pricing from $15/M to $7.50/M tokens.",
+            "strategic_takeaway": "Undercuts proprietary competitors on complex reasoning unit economics; triggers pricing pressure on Claude 3.5 and Gemini APIs.",
+            "tags": ["Pricing War", "Inference Costs", "API"],
+            "duplicate_count": 2,
+            "similar_sources": ["VentureBeat", "Hacker News"],
+            "is_featured": False
+        },
+        # Anthropic
+        {
+            "id": "upd-ant-1",
+            "competitor_id": "comp-anthropic",
+            "competitor_name": "Anthropic",
+            "title": "Anthropic expands Claude Enterprise Plan with Github and Snowflake direct integrations",
+            "url": "https://anthropic.com/news/claude-enterprise-integrations",
+            "source": "Anthropic Press Room",
+            "published_at": (now - timedelta(hours=18)).isoformat(),
+            "category": "Partnership",
+            "impact_score": 8,
+            "sentiment": "Positive",
+            "raw_summary": "Anthropic rolled out 500k context window capabilities paired with native repository indexing across private GitHub organizations and Snowflake data warehouses.",
+            "strategic_takeaway": "Secures developer and data team lock-in inside Fortune 500 accounts before OpenAI can unify repo-scale context.",
+            "tags": ["Enterprise", "GitHub", "Snowflake", "Context Window"],
+            "duplicate_count": 3,
+            "similar_sources": ["Bloomberg", "ZDNet"],
+            "is_featured": True
+        },
+        {
+            "id": "upd-ant-2",
+            "competitor_id": "comp-anthropic",
+            "competitor_name": "Anthropic",
+            "title": "Anthropic hires former Meta AI VP of Infrastructure to scale 100k TPU clusters",
+            "url": "https://anthropic.com/careers/leadership-announcement",
+            "source": "The Information",
+            "published_at": (now - timedelta(days=2, hours=10)).isoformat(),
+            "category": "Hiring & Leadership",
+            "impact_score": 7,
+            "sentiment": "Positive",
+            "raw_summary": "Anthropic recruited senior infra leadership from Meta to oversee compute orchestration on AWS Trainium2 and Google Cloud TPU v5e/v6 clusters.",
+            "strategic_takeaway": "Signals preparation for massive scale next-gen Claude 4 training runs and multi-cloud resilience.",
+            "tags": ["Talent Acquisition", "Infrastructure", "TPU"],
+            "duplicate_count": 1,
+            "similar_sources": ["The Information"],
+            "is_featured": False
+        },
+        # Perplexity
+        {
+            "id": "upd-perp-1",
+            "competitor_id": "comp-perplexity",
+            "competitor_name": "Perplexity",
+            "title": "Perplexity launches Revenue-Sharing Publisher Program with Time, Der Spiegel, and Fortune",
+            "url": "https://perplexity.ai/hub/blog/publishers-program",
+            "source": "Wall Street Journal",
+            "published_at": (now - timedelta(days=4)).isoformat(),
+            "category": "Partnership",
+            "impact_score": 8,
+            "sentiment": "Positive",
+            "raw_summary": "Perplexity introduced a revenue-share model distributing ad and subscription dividends to media publications whose content powers AI query answers.",
+            "strategic_takeaway": "Defuses copyright litigation risks and establishes a defensible moat against Google and OpenAI Search partnerships.",
+            "tags": ["Publishers", "Revenue Share", "Legal Defense"],
+            "duplicate_count": 5,
+            "similar_sources": ["WSJ", "Axios", "NiemanLab"],
+            "is_featured": False
+        },
+        {
+            "id": "upd-perp-2",
+            "competitor_id": "comp-perplexity",
+            "competitor_name": "Perplexity",
+            "title": "Perplexity introduces Internal Enterprise Knowledge Search with Slack and Notion connectors",
+            "url": "https://perplexity.ai/enterprise",
+            "source": "Perplexity Blog",
+            "published_at": (now - timedelta(days=1)).isoformat(),
+            "category": "Product",
+            "impact_score": 7,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "Perplexity Enterprise Pro now indexes company wikis, Slack channels, and Google Drives alongside real-time web citations in a unified interface.",
+            "strategic_takeaway": "Pivoting from purely consumer web search to workplace productivity, directly clashing with Glean and Microsoft Copilot.",
+            "tags": ["Enterprise Search", "Workplace AI", "Integrations"],
+            "duplicate_count": 2,
+            "similar_sources": ["TechCrunch", "VentureBeat"],
+            "is_featured": True
+        },
+        # Cursor
+        {
+            "id": "upd-cur-1",
+            "competitor_id": "comp-cursor",
+            "competitor_name": "Cursor",
+            "title": "Cursor raises $60M Series A led by Andreessen Horowitz at $400M valuation",
+            "url": "https://techcrunch.com/cursor-series-a-anysphere",
+            "source": "TechCrunch",
+            "published_at": (now - timedelta(days=5)).isoformat(),
+            "category": "Funding & M&A",
+            "impact_score": 8,
+            "sentiment": "Positive",
+            "raw_summary": "Anysphere, the startup behind Cursor, secured $60M in fresh capital from a16z and angel investors to expand their agentic coding engine and shadow workspace.",
+            "strategic_takeaway": "Massive war chest to recruit top compiler and ML talent; accelerates feature velocity against GitHub Copilot Workspace.",
+            "tags": ["Series A", "Funding", "Developer Ecosystem"],
+            "duplicate_count": 3,
+            "similar_sources": ["Forbes", "Bloomberg"],
+            "is_featured": False
+        },
+        {
+            "id": "upd-cur-2",
+            "competitor_id": "comp-cursor",
+            "competitor_name": "Cursor",
+            "title": "Cursor releases Multi-File Agent 'Composer' with background terminal execution",
+            "url": "https://cursor.com/blog/composer-agent",
+            "source": "Cursor Changelog",
+            "published_at": (now - timedelta(hours=12)).isoformat(),
+            "category": "Product",
+            "impact_score": 9,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "Cursor upgraded its Composer feature to autonomously create whole full-stack applications, execute bash scripts, run test suites, and self-heal build errors.",
+            "strategic_takeaway": "Sets a new standard for AI developer IDEs; transforms code completion into end-to-end autonomous software engineering.",
+            "tags": ["DevTools", "Agentic Coding", "Productivity"],
+            "duplicate_count": 4,
+            "similar_sources": ["Hacker News", "Product Hunt"],
+            "is_featured": True
+        },
+        # Mistral AI
+        {
+            "id": "upd-mis-1",
+            "competitor_id": "comp-mistral",
+            "competitor_name": "Mistral AI",
+            "title": "Mistral releases Pixtral Large 124B multimodal model with open Apache 2.0 weights",
+            "url": "https://mistral.ai/news/pixtral-large/",
+            "source": "Mistral AI Blog",
+            "published_at": (now - timedelta(days=2)).isoformat(),
+            "category": "Research & Tech",
+            "impact_score": 8,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "Mistral unveiled Pixtral Large, a 124-billion parameter frontier vision-language model competitive with GPT-4o on visual reasoning, charts, and document analysis.",
+            "strategic_takeaway": "Provides enterprises and sovereign institutions with an unconstrained open multimodal foundation, challenging commercial API monopolies.",
+            "tags": ["Open Weights", "Multimodal", "Vision AI"],
+            "duplicate_count": 3,
+            "similar_sources": ["VentureBeat", "Hugging Face"],
+            "is_featured": True
+        },
+        # xAI
+        {
+            "id": "upd-xai-1",
+            "competitor_id": "comp-xai",
+            "competitor_name": "xAI",
+            "title": "xAI brings Colossus cluster to 200,000 Nvidia H100/H200 GPUs in Memphis",
+            "url": "https://x.ai/blog/colossus-200k",
+            "source": "Reuters",
+            "published_at": (now - timedelta(days=3, hours=5)).isoformat(),
+            "category": "Research & Tech",
+            "impact_score": 8,
+            "sentiment": "Neutral",
+            "raw_summary": "xAI announced the doubling of its Memphis supercomputing data center to 200,000 GPUs, aiming to train Grok 3 with unprecedented parameter density.",
+            "strategic_takeaway": "Positions xAI as having the single largest unified compute cluster in production, compensating for shorter research history through sheer raw FLOPS.",
+            "tags": ["Compute", "Supercluster", "GPU"],
+            "duplicate_count": 5,
+            "similar_sources": ["The Verge", "Tom's Hardware"],
+            "is_featured": False
+        },
+        # Google DeepMind
+        {
+            "id": "upd-gdm-1",
+            "competitor_id": "comp-deepmind",
+            "competitor_name": "Google DeepMind",
+            "title": "Google DeepMind announces Project Astra real-time assistant rollout across Android and Pixel",
+            "url": "https://deepmind.google/technologies/astra/",
+            "source": "Google The Keyword",
+            "published_at": (now - timedelta(hours=30)).isoformat(),
+            "category": "Product",
+            "impact_score": 9,
+            "sentiment": "Disruptive / Threat",
+            "raw_summary": "DeepMind's continuous video and speech agent Astra is integrating natively into Android System Intelligence, processing live camera streams with sub-200ms latency.",
+            "strategic_takeaway": "Capitalizes on Google's 3-billion-device Android hardware distribution moat, making it hard for pure-play model providers to compete on mobile real-time interaction.",
+            "tags": ["Project Astra", "Android", "Multimodal Live"],
+            "duplicate_count": 6,
+            "similar_sources": ["Engadget", "CNET", "Wired"],
+            "is_featured": True
+        },
+        # Cohere
+        {
+            "id": "upd-coh-1",
+            "competitor_id": "comp-cohere",
+            "competitor_name": "Cohere",
+            "title": "Cohere expands private cloud VPC deployment options for North American banks",
+            "url": "https://cohere.com/blog/banking-vpc-security",
+            "source": "Financial Times",
+            "published_at": (now - timedelta(days=4, hours=8)).isoformat(),
+            "category": "Partnership",
+            "impact_score": 7,
+            "sentiment": "Positive",
+            "raw_summary": "Cohere partnered with top Canadian and US banking consortiums to deploy air-gapped Command R+ models within strictly audited on-prem and hybrid clouds.",
+            "strategic_takeaway": "Reinforces Cohere's defense against hyperscalers in ultra-regulated financial services where public APIs are strictly forbidden.",
+            "tags": ["Financial Services", "Private Cloud", "Compliance"],
+            "duplicate_count": 2,
+            "similar_sources": ["American Banker", "Finextra"],
+            "is_featured": False
+        }
+    ]
+    return updates

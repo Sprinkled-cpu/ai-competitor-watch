@@ -1,0 +1,47 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: competitor_watch_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=competitor_watch
+
+  # Python FastAPI Intelligence Agent Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: competitor_watch_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+      - DB_NAME=competitor_watch
+      - MAX_ARTICLES_PER_COMPETITOR=12
+      - DEDUPLICATION_THRESHOLD=0.62
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/data:/app/data
+
+  # React + Vite + ReactBits Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: competitor_watch_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+    driver: local
