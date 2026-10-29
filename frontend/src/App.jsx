@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, RefreshCw, Plus, Layers, Flame, FileText, CheckCircle2, Radio, Sparkles, Swords, Globe } from 'lucide-react';
+import { Search, Filter, RefreshCw, Plus, Layers, Flame, FileText, CheckCircle2, Radio, Sparkles, Swords, Globe, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import CyberGrid from './components/reactbits/CyberGrid';
@@ -14,8 +14,12 @@ import UpdateDetailModal from './components/UpdateDetailModal';
 import ExecutiveBriefView from './components/ExecutiveBriefView';
 import AnalyticsView from './components/AnalyticsView';
 import ManageCompetitorsModal from './components/ManageCompetitorsModal';
+import LandingHeroSetup from './components/LandingHeroSetup';
+import Footer from './components/Footer';
+import ContactUsModal from './components/ContactUsModal';
 import ShinyText from './components/reactbits/ShinyText';
 import DecryptedText from './components/reactbits/DecryptedText';
+import { playPop } from './utils/soundEffects';
 
 import {
   fetchCompetitors,
@@ -35,6 +39,9 @@ import {
 const CATEGORIES = ['All', 'Product', 'Pricing', 'Hiring & Leadership', 'Partnership', 'Funding & M&A', 'Research & Tech'];
 
 export default function App() {
+  const [hasLaunchedDashboard, setHasLaunchedDashboard] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'brief' | 'analytics'
   const [competitors, setCompetitors] = useState([]);
   const [selectedCompetitor, setSelectedCompetitor] = useState(null);
@@ -180,6 +187,26 @@ export default function App() {
     }
   };
 
+  const handleLaunchFromLanding = async (companies) => {
+    try {
+      setLoading(true);
+      await handleBulkImport(companies);
+      setHasLaunchedDashboard(true);
+      // Trigger scan simulation so the user immediately sees the agent working
+      handleTriggerScan();
+    } catch (err) {
+      console.error('Failed to launch with companies:', err);
+      setHasLaunchedDashboard(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReturnToSetup = () => {
+    playPop();
+    setHasLaunchedDashboard(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* React Bits Cyber Grid Background */}
@@ -195,71 +222,108 @@ export default function App() {
         competitorCount={competitors.length}
         onOpenManageModal={() => setIsManageModalOpen(true)}
         isScanning={isScanning}
+        hasLaunchedDashboard={hasLaunchedDashboard}
+        onReturnToSetup={handleReturnToSetup}
       />
 
-      {/* Main Container */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Universal Enterprise Hero Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span>UNIVERSAL MARKET SURVEILLANCE RADAR</span>
-              <span className="text-slate-600">//</span>
-              <DecryptedText text="CROSS-INDUSTRY INTELLIGENCE ACTIVE" />
+      {/* Conditional: Landing Showcase & Input Flow vs Active Live Dashboard */}
+      {!hasLaunchedDashboard ? (
+        <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+          <LandingHeroSetup onLaunchDashboard={handleLaunchFromLanding} />
+        </main>
+      ) : (
+        <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          {/* Active Surveillance Banner with Return/Modify Target Controls */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-cyan-950/60 via-slate-900/90 to-indigo-950/60 border border-cyan-500/30 backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl shadow-cyan-950/30">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="font-bold tracking-wider">ACTIVE SURVEILLANCE RUNNING</span>
+                <span className="text-slate-600">•</span>
+                <span className="text-emerald-400 font-semibold">{competitors.length} Targets In Watchlist</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {competitors.map((c) => (
+                  <span
+                    key={c.id || c.name}
+                    className="px-3 py-1 rounded-xl bg-cyan-950/80 text-cyan-200 border border-cyan-700/60 text-xs font-semibold shadow-sm"
+                  >
+                    {c.name}
+                  </span>
+                ))}
+              </div>
             </div>
-            
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight">
-              Universal Competitor <ShinyText text="Intelligence Engine" />
-            </h2>
-            
-            <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
-              Track any company or product across any industry worldwide — Automobiles, Food & Dining, Retail, Fintech, SaaS, or Healthcare. Autonomous noise elimination, strategic categorization, and executive threat briefs.
-            </p>
 
-            {/* Live Status Indicators */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-mono">
-              <span className="px-3 py-1 rounded-full bg-cyan-950/60 text-cyan-300 border border-cyan-800/50 flex items-center gap-1.5 shadow-sm">
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                Active Targets: <strong>{competitors.length} Monitored</strong>
-              </span>
-
-              <span className="px-3 py-1 rounded-full bg-slate-900/90 text-slate-300 border border-slate-800 flex items-center gap-1.5 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
-                Universal Noise Filtering: <strong>Active</strong>
-              </span>
-
-              <span className="px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 flex items-center gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                Strategic Impact: <strong>1-10 Scale</strong>
-              </span>
+            <div className="flex items-center gap-2.5 shrink-0 w-full md:w-auto">
+              <button
+                onClick={handleReturnToSetup}
+                className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all shadow-lg shadow-cyan-500/25 cursor-pointer"
+                title="Return to setup and enter different companies"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Change Targets / New Search</span>
+              </button>
+              <button
+                onClick={() => setIsManageModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
+              >
+                <Plus className="w-4 h-4 text-cyan-400" />
+                <span className="hidden sm:inline">Manage Targets</span>
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setIsManageModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700/80 hover:border-cyan-500/50 transition-all shadow-lg shadow-cyan-950/20"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Target Manager</span>
-            </button>
+          {/* Universal Enterprise Hero Section */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span>UNIVERSAL MARKET SURVEILLANCE RADAR</span>
+                <span className="text-slate-600">//</span>
+                <DecryptedText text="CROSS-INDUSTRY INTELLIGENCE ACTIVE" />
+              </div>
+              
+              <h2 className="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight">
+                Universal Competitor <ShinyText text="Intelligence Engine" />
+              </h2>
+              
+              <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                Track any company or product across any industry worldwide — Automobiles, Food & Dining, Retail, Fintech, SaaS, or Healthcare. Autonomous noise elimination, strategic categorization, and executive threat briefs.
+              </p>
+
+              {/* Live Status Indicators */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-mono">
+                <span className="px-3 py-1 rounded-full bg-cyan-950/60 text-cyan-300 border border-cyan-800/50 flex items-center gap-1.5 shadow-sm">
+                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                  Active Targets: <strong>{competitors.length} Monitored</strong>
+                </span>
+
+                <span className="px-3 py-1 rounded-full bg-slate-900/90 text-slate-300 border border-slate-800 flex items-center gap-1.5 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                  Universal Noise Filtering: <strong>Active</strong>
+                </span>
+
+                <span className="px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 flex items-center gap-1.5 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  Strategic Impact: <strong>1-10 Scale</strong>
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Universal Industry Sector Switcher & Custom Multi-Company Onboarding Bar */}
-        <IndustryQuickSwitcher
-          activePreset={activeSector}
-          onSelectPreset={handleSelectSector}
-          onBulkImport={handleBulkImport}
-        />
+          {/* Universal Industry Sector Switcher & Custom Multi-Company Onboarding Bar */}
+          <IndustryQuickSwitcher
+            activePreset={activeSector}
+            onSelectPreset={handleSelectSector}
+            onBulkImport={handleBulkImport}
+          />
 
-        {/* Live Autonomous Agent Telemetry & Control Terminal */}
-        <LiveAgentTerminal
-          scanStatus={scanStatus}
-          onTriggerScan={handleTriggerScan}
-          isScanning={isScanning}
-        />
+          {/* Live Autonomous Agent Telemetry & Control Terminal */}
+          <LiveAgentTerminal
+            scanStatus={scanStatus}
+            onTriggerScan={handleTriggerScan}
+            isScanning={isScanning}
+          />
 
         {/* Tab 1: Live Feed View */}
         {activeTab === 'feed' && (
@@ -487,6 +551,10 @@ export default function App() {
           </div>
         )}
       </main>
+      )}
+
+      {/* Global Universal Footer with Legal Copyright & Contact Us Trigger */}
+      <Footer onOpenContact={() => setIsContactOpen(true)} />
 
       {/* Interactive Update Detail Pop-up Modal */}
       <UpdateDetailModal
@@ -503,6 +571,12 @@ export default function App() {
         onAddCompetitor={handleAddCompetitor}
         onDeleteCompetitor={handleDeleteCompetitor}
         onResetPreset={handleResetPreset}
+      />
+
+      {/* Contact Us Modal */}
+      <ContactUsModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
       />
     </div>
   );

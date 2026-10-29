@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 import asyncio
-from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, JSONResponse
 from typing import Optional, List, Dict, Any
@@ -23,10 +23,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AI Competitor Watch Agent API",
-    description="Autonomous competitive intelligence agent that monitors, deduplicates, categorizes, and synthesizes competitor updates.",
+    description="Autonomous competitive intelligence agent that monitors, deduplicates, categorizes, and synthesizes competitor updates across any global industry.",
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Enterprise HTTP Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 app.add_middleware(
     CORSMiddleware,
