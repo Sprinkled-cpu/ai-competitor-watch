@@ -1,6 +1,12 @@
 # 👁️ AI Competitor Watch Agent
 
+[![Live on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://frontend-one-psi-97.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Sprinkled--cpu%2Fai--competitor--watch-181717?style=for-the-badge&logo=github)](https://github.com/Sprinkled-cpu/ai-competitor-watch)
+
 > **Autonomous Competitive Intelligence Engine** that continuously monitors 5–10 competitor ecosystems, eliminates noise and duplicate syndicated articles, categorizes strategic moves (Product, Pricing, Hiring, Partnerships, Funding, Tech), calculates threat scores, and synthesizes concise executive intelligence briefs.
+
+🌐 **Live Production Deployment:** [https://frontend-one-psi-97.vercel.app](https://frontend-one-psi-97.vercel.app)  
+📦 **GitHub Repository:** [https://github.com/Sprinkled-cpu/ai-competitor-watch](https://github.com/Sprinkled-cpu/ai-competitor-watch)
 
 Built with a high-performance **Python FastAPI** agent pipeline, dual-engine storage (**MongoDB** + zero-config local fallback), and a responsive cyberpunk dashboard powered by **React**, **Tailwind CSS**, and **React Bits** component patterns (Spotlight cards, holographic shiny typography, animated telemetry terminal, and ambient cyber radar).
 

@@ -86,11 +86,11 @@ export default function Navbar({
           </button>
 
           <a
-            href="https://github.com"
+            href="https://github.com/Sprinkled-cpu/ai-competitor-watch"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 border border-slate-700/60 transition-colors"
-            title="GitHub Repository"
+            title="GitHub Repository: Sprinkled-cpu/ai-competitor-watch"
           >
             <GitBranch className="w-4 h-4 text-cyan-400" />
           </a>
