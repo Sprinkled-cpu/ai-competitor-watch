@@ -19,14 +19,19 @@ class LiveUpdateScraper:
         }
 
     async def fetch_competitor_news(self, competitor: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Fetch raw recent news updates for a given competitor using news RSS and search feeds."""
+        """
+        Fetch raw recent news updates for ANY company or product across ANY industry.
+        Uses universal business and operational triggers: launches, pricing, leadership, partnerships, funding.
+        """
         name = competitor.get("name", "")
         keywords = competitor.get("keywords", [name])
         articles: List[Dict[str, Any]] = []
 
-        # Build search query targeted for business & tech updates
+        # Target keywords for the company
         search_terms = " OR ".join([f'"{k}"' for k in keywords[:3]])
-        query = f'({search_terms}) (AI OR launch OR model OR pricing OR partnership OR funding OR hire)'
+        # Universal industry triggers (automotive, food, retail, fintech, tech, pharma, etc.)
+        triggers = "launch OR releases OR product OR pricing OR price OR cuts OR hire OR executive OR CEO OR partnership OR partner OR acquisition OR funding OR expansion OR store OR menu OR factory OR patent"
+        query = f'({search_terms}) ({triggers})'
         encoded_query = urllib.parse.quote(query)
         
         rss_url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"

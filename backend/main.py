@@ -61,12 +61,62 @@ async def delete_competitor(comp_id: str):
         raise HTTPException(status_code=404, detail="Competitor not found")
     return {"status": "deleted", "id": comp_id}
 
+@app.get("/api/presets")
+async def list_presets():
+    from agent.seed_data import INDUSTRY_PRESETS
+    return {k: {"name": v["name"], "description": v["description"], "count": len(v["competitors"])} for k, v in INDUSTRY_PRESETS.items()}
+
+@app.post("/api/competitors/load-preset/{preset_key}")
+async def load_industry_preset(preset_key: str):
+    from agent.seed_data import INDUSTRY_PRESETS, generate_seed_updates
+    if preset_key not in INDUSTRY_PRESETS:
+        raise HTTPException(status_code=404, detail="Preset not found")
+    
+    preset = INDUSTRY_PRESETS[preset_key]
+    await db_client.reset_to_preset(preset["competitors"])
+    seed_upd = generate_seed_updates(preset_key)
+    for u in seed_upd:
+        await db_client.save_update(u)
+    
+    # Generate executive brief for this preset
+    from agent.synthesizer import ExecutiveBriefSynthesizer
+    brief = ExecutiveBriefSynthesizer().generate_brief(preset["competitors"], seed_upd)
+    await db_client.save_brief(brief)
+
+    return {"status": "loaded", "preset": preset["name"], "competitors_count": len(preset["competitors"])}
+
+@app.post("/api/competitors/bulk")
+async def bulk_add_competitors(payload: Dict[str, Any]):
+    """Accepts any list of 5-10 company names from ANY industry and registers them for surveillance."""
+    companies = payload.get("companies", [])
+    if not companies:
+        raise HTTPException(status_code=400, detail="No companies provided")
+    
+    import uuid
+    new_comps = []
+    for c in companies:
+        c_name = c.strip() if isinstance(c, str) else c.get("name", "").strip()
+        if not c_name:
+            continue
+        comp_obj = {
+            "id": f"comp-{uuid.uuid4().hex[:8]}",
+            "name": c_name,
+            "domain": f"{c_name.lower().replace(' ', '')}.com",
+            "description": f"Target monitored entity: {c_name}",
+            "tags": ["Target Entity", "Custom Watchlist"],
+            "keywords": [c_name],
+            "active": True
+        }
+        await db_client.create_competitor(comp_obj)
+        new_comps.append(comp_obj)
+    
+    return {"status": "created", "added_count": len(new_comps), "competitors": new_comps}
+
 @app.post("/api/competitors/reset-preset")
 async def reset_preset():
+    from agent.seed_data import DEFAULT_COMPETITORS, generate_seed_updates
     await db_client.reset_to_preset(DEFAULT_COMPETITORS)
-    # Trigger seed updates
-    from agent.seed_data import generate_seed_updates
-    seed_upd = generate_seed_updates()
+    seed_upd = generate_seed_updates("automotive")
     for u in seed_upd:
         await db_client.save_update(u)
     return {"status": "reset", "competitors_count": len(DEFAULT_COMPETITORS)}

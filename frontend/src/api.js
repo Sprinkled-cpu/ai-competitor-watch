@@ -1,4 +1,5 @@
 import {
+  INDUSTRY_DATA,
   FALLBACK_COMPETITORS,
   FALLBACK_UPDATES,
   FALLBACK_BRIEF,
@@ -53,6 +54,85 @@ export async function deleteCompetitor(id) {
   localCompetitors = localCompetitors.filter((c) => c.id !== id);
   localUpdates = localUpdates.filter((u) => u.competitor_id !== id);
   return { status: 'deleted', id };
+}
+
+export async function loadIndustryPreset(presetKey) {
+  try {
+    const res = await fetch(`${API_BASE}/api/competitors/load-preset/${presetKey}`, {
+      method: 'POST',
+      signal: AbortSignal.timeout(2500),
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // Fallback
+  }
+  const data = INDUSTRY_DATA[presetKey] || INDUSTRY_DATA.automotive;
+  localCompetitors = [...data.competitors];
+  localUpdates = [...data.updates];
+  return { status: 'loaded', preset: data.name, competitors_count: localCompetitors.length };
+}
+
+export async function bulkAddCompetitors(companies) {
+  try {
+    const res = await fetch(`${API_BASE}/api/competitors/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companies }),
+      signal: AbortSignal.timeout(2500),
+    });
+    if (res.ok) return await res.json();
+  } catch {
+    // Fallback
+  }
+  const newComps = companies.map((name, i) => ({
+    id: `comp-custom-${Date.now()}-${i}`,
+    name,
+    domain: `${name.toLowerCase().replace(/\s+/g, '')}.com`,
+    description: `Target monitored entity: ${name}`,
+    tags: ["Custom Entity", "Active Target"],
+    active: true,
+  }));
+  localCompetitors = [...newComps];
+  // Generate sample categorized updates for these custom companies
+  localUpdates = newComps.flatMap((c) => [
+    {
+      id: `upd-${c.id}-1`,
+      competitor_id: c.id,
+      competitor_name: c.name,
+      title: `${c.name} unveils major quarterly product line expansion & operational push`,
+      url: `https://${c.domain}`,
+      source: "Global Industry Wire",
+      published_at: new Date().toISOString(),
+      category: "Product",
+      impact_score: 8,
+      sentiment: "Positive",
+      raw_summary: `${c.name} announced a comprehensive operational restructuring and new product rollout targeting cross-market consumer demand.`,
+      strategic_takeaway: `Competitive escalation: ${c.name} is accelerating go-to-market cadence to seize category market share.`,
+      tags: ["Expansion", "Product", "Strategy"],
+      duplicate_count: 3,
+      similar_sources: ["Industry Week", "MarketWatch", "Reuters"],
+      is_featured: true,
+    },
+    {
+      id: `upd-${c.id}-2`,
+      competitor_id: c.id,
+      competitor_name: c.name,
+      title: `${c.name} slashes subscription and tier pricing in aggressive volume campaign`,
+      url: `https://${c.domain}`,
+      source: "Commercial Journal",
+      published_at: new Date(Date.now() - 3600 * 1000 * 18).toISOString(),
+      category: "Pricing",
+      impact_score: 9,
+      sentiment: "Disruptive / Threat",
+      raw_summary: `In a direct bid to undercut rival offerings, ${c.name} introduced discounted pricing tiers across retail and commercial accounts.`,
+      strategic_takeaway: `Margin pressure alert: Directly attacks pricing power of direct competitors in the same vertical.`,
+      tags: ["Pricing", "Discounts", "Market Share"],
+      duplicate_count: 2,
+      similar_sources: ["Bloomberg", "Financial Times"],
+      is_featured: true,
+    }
+  ]);
+  return { status: 'created', added_count: newComps.length, competitors: newComps };
 }
 
 export async function resetPreset() {
